@@ -1,0 +1,105 @@
+<?xml version="1.0" ?>
+<argos-configuration>
+
+  <!-- ************************* -->
+  <!-- * General configuration * -->
+  <!-- ************************* -->
+  <framework>
+    <system threads="0" />
+    <experiment length="0"
+                ticks_per_second="10"
+                random_seed="124" />
+  </framework>
+
+  <!-- *************** -->
+  <!-- * Controllers * -->
+  <!-- *************** -->
+  <controllers>
+
+    <footbot_flocking_controller id="ffc"
+                                 library="build/controllers/footbot_flocking/libfootbot_flocking.so">
+      <actuators>
+        <footbot_wheels implementation="default" />
+        <footbot_beacon implementation="default" />
+        <footbot_leds   implementation="default" />
+      </actuators>
+      <sensors>
+        <footbot_omnidirectional_camera implementation="rot_z_only" show_rays="false" />
+        <footbot_light implementation="rot_z_only" show_rays="false" />
+      </sensors>
+      <parameters>
+        <wheel_turning hard_turn_angle_threshold="90"
+                       soft_turn_angle_threshold="70"
+                       no_turn_angle_threshold="10"
+                       max_speed="10" />
+        <flocking target_distance="75"
+                  gain="1000"
+                  exponent="2" />
+      </parameters>
+    </footbot_flocking_controller>
+
+  </controllers>
+
+  <!-- *********************** -->
+  <!-- * Arena configuration * -->
+  <!-- *********************** -->
+  <arena size="2, 2, 1">
+
+    <light id="light"
+           position="0,0,0.5"
+           orientation="0,0,0"
+           color="yellow"
+           intensity="3.0" />
+
+    <!--
+        You can distribute entities randomly. Here, we distribute
+        the entities in this way:
+        - the position is uniformly distributed
+        on the ground, in the square whose corners are (1,1) and (2,2)
+        - the orientations are non-zero only when rotating around Z and chosen
+        from a gaussian distribution, whose mean is zero degrees and
+        standard deviation is 360 degrees.
+    -->
+    <distribute>
+      <position method="uniform" min="4,4,0" max="5,5,0" />
+      <orientation method="gaussian" mean="0,0,0" std_dev="360,0,0" />
+      <entity quantity="10" max_trials="100">
+        <foot-bot id="fb"
+                  controller="ffc" />
+      </entity>
+    </distribute>
+
+  </arena>
+
+  <!-- ******************* -->
+  <!-- * Physics engines * -->
+  <!-- ******************* -->
+  <physics_engines>
+    <dynamics2d id="dyn2d" />
+  </physics_engines>
+
+  <!-- ************************************ -->
+  <!-- * Arena -> Physics Engines mapping * -->
+  <!-- ************************************ -->
+  <arena_physics>
+    <engine id="dyn2d">
+      <!--
+         You can use a regular expression to bind a set of entities.
+         See 'man 3 regex' to know more about regular expressions.
+        -->
+      <entity id="fb_[[:digit:]]*" />
+    </engine>
+  </arena_physics>
+
+  <!-- ****************** -->
+  <!-- * Visualization * -->
+  <!-- ****************** -->
+  <visualization>
+    <qtopengl_render splash="false">
+      <camera>
+        <placement idx="0" position="5.33539,5.60355,1.06253" look_at="4.70428,4.92503,0.686605" lens_focal_length="20" />
+      </camera>
+    </qtopengl_render>
+  </visualization>
+
+</argos-configuration>
